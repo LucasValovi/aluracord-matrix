@@ -14,5 +14,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
-  }
+  },
+  "repository": "https://github.com/LucasValovi/aluracord-matrix.git",
+  "author": "Lucas Valovi <lucasvalovi@hotmail.com>"
 }

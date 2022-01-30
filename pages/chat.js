@@ -1,10 +1,28 @@
 import { Box, Text, TextField, Image, Button } from "@skynexui/components";
 import React from "react";
 import appConfig from "../pages/config.json";
+import { createClient, CreateClient } from "@supabase/supabase-js";
+
+// Como fazer AJAX: https://medium.com/@omariosouto/entendendo-como-fazer-ajax-com-a-fetchapi-977ff20da3c6
+const SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MzU1MzgxMywiZXhwIjoxOTU5MTI5ODEzfQ.rU4MNb6xyKFBPJTK92_i9wyhRfI3ENsrAF1nyORolvk";
+const SUPABASE_URL = "https://makhuxlsarfclpvqujog.supabase.co";
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 export default function ChatPage() {
   const [mensagem, setMensagem] = React.useState("");
   const [listaDeMensagens, setListaDeMensagens] = React.useState([]);
+
+  React.useEffect(() => {
+    supabaseClient
+           .from('mensagens')
+           .select('*')
+           .order('id', { ascending: false })
+           .then(({ data }) => {
+             console.log('Dados da consulta', data);
+             setListaDeMensagens(data);
+           });
+    }, []);
 
   /*
     // Usuário    
@@ -19,16 +37,25 @@ export default function ChatPage() {
     */
   function handleNovaMensagem(novaMensagem) {
     const mensagem = {
-      id: listaDeMensagens.lenght + 1,
-      de: 'vanessametonini',
+  //  id: listaDeMensagens.lenght + 1,
+      de: "vanessametonini",
       texto: novaMensagem,
     };
-    
-    setListaDeMensagens([
-        mensagem,
-        ...listaDeMensagens, 
-    ]);
-    setMensagem('');
+
+    supabaseClient
+        .from('mensagens')
+        .insert([
+            mensagem
+        ])
+        .then(({ data }) => {
+            console.log('Criando mensagem: ', data);
+            setListaDeMensagens([
+            data[0], 
+            ...listaDeMensagens,
+            ]);
+        });        
+  
+    setMensagem("");
   }
 
   return (
@@ -184,11 +211,9 @@ function MessageList(props) {
                   display: "inline-block",
                   marginRight: "8px",
                 }}
-                src={`https://github.com/vanessametonini.png`}
+                src={`https://github.com/${mensagem.de}.png`}
               />
-              <Text tag="strong">
-                  {mensagem.de}
-              </Text>
+              <Text tag="strong">{mensagem.de}</Text>
               <Text
                 styleSheet={{
                   fontSize: "10px",
